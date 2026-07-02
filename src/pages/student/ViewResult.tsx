@@ -11,7 +11,8 @@ import {
   Download, 
   ChevronLeft, 
   Lock, 
-  AlertCircle 
+  AlertCircle,
+  ShieldAlert 
 } from 'lucide-react';
 import { LoadingSpinner } from '../../components/UI/LoadingSpinner';
 import { downloadResultPDF } from '../../utils/pdfGenerator';
@@ -209,6 +210,23 @@ export const ViewResult: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Proctoring Report Banner */}
+        {result.tabSwitches > 0 && (
+          <div className="mt-4 flex items-center justify-between p-4 rounded-2xl border bg-amber-50/60 border-amber-150 dark:bg-amber-955/10 dark:border-amber-900/60 text-amber-800 dark:text-amber-400 shadow-sm">
+            <div className="flex items-center gap-3">
+              <ShieldAlert className="h-6 w-6 flex-shrink-0" />
+              <div>
+                <p className="font-bold text-sm">
+                  AI Proctoring Audit Warning
+                </p>
+                <p className="text-xs font-medium opacity-90 mt-0.5">
+                  Candidate was flagged with {result.tabSwitches} window/tab switch occurrences during this attempt.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Explanations & Answers Section */}

@@ -21,6 +21,7 @@ export const AttemptExam: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tabSwitches, setTabSwitches] = useState(0);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const answersRef = useRef(answers);
@@ -89,6 +90,7 @@ export const AttemptExam: React.FC = () => {
             return;
           }
           setAnswers(activeAttempt.answers || {});
+          setTabSwitches(activeAttempt.tabSwitches || 0);
         } else {
           // Initialize fresh attempt
           activeAttempt = {
@@ -240,7 +242,8 @@ export const AttemptExam: React.FC = () => {
         wrongCount,
         rank: 1, // default rank in fallback
         submittedAt: serverTimestamp(),
-        timeTaken
+        timeTaken,
+        tabSwitches: tabSwitches
       });
 
       // Create notification
@@ -296,6 +299,38 @@ export const AttemptExam: React.FC = () => {
       });
   };
 
+  useEffect(() => {
+    if (loading || error || submitting || !attempt) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        setTabSwitches(prev => {
+          const nextVal = prev + 1;
+          
+          // Save switch count in Firestore
+          const attemptDocRef = doc(db, 'attempts', attempt.id);
+          updateDoc(attemptDocRef, {
+            tabSwitches: nextVal
+          }).catch(e => console.error("Failed to log tab switch:", e));
+
+          if (nextVal >= 3) {
+            alert("Violation Limit Exceeded: You have switched tabs 3 times. Your examination is being auto-submitted immediately.");
+            submitAttempt(true); // force submit
+          } else {
+            alert(`Security Warning: Tab switch detected! Leaving the exam window is a policy violation. (Warnings: ${nextVal}/3)`);
+          }
+
+          return nextVal;
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [loading, error, submitting, attempt]);
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -347,15 +382,24 @@ export const AttemptExam: React.FC = () => {
           <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">{exam?.subject}</p>
         </div>
 
-        {/* Sync Timer Block */}
-        <div className={`flex items-center gap-2 rounded-2xl border px-4 py-2 font-mono text-sm font-bold shadow-sm transition-all
-          ${isLowTime
-            ? 'bg-red-50 border-red-200 text-red-600 animate-pulse dark:bg-red-950/20 dark:border-red-900 dark:text-red-400'
-            : 'bg-slate-50 border-slate-100 text-slate-700 dark:bg-slate-800 dark:border-slate-750 dark:text-slate-200'
-          }
-        `}>
-          <Clock className="h-4 w-4" />
-          <span>{timeLeft !== null ? formatTime(timeLeft) : '00:00'}</span>
+        <div className="flex items-center gap-3">
+          {tabSwitches > 0 && (
+            <div className="flex items-center gap-1.5 rounded-2xl bg-red-50 border border-red-205 px-3 py-2 text-xs font-bold text-red-655 dark:bg-red-955/20 dark:border-red-900 dark:text-red-400 animate-pulse">
+              <ShieldAlert className="h-4 w-4" />
+              <span>Warnings: {tabSwitches}/3</span>
+            </div>
+          )}
+
+          {/* Sync Timer Block */}
+          <div className={`flex items-center gap-2 rounded-2xl border px-4 py-2 font-mono text-sm font-bold shadow-sm transition-all
+            ${isLowTime
+              ? 'bg-red-50 border-red-200 text-red-600 animate-pulse dark:bg-red-950/20 dark:border-red-900 dark:text-red-400'
+              : 'bg-slate-50 border-slate-100 text-slate-700 dark:bg-slate-800 dark:border-slate-750 dark:text-slate-200'
+            }
+          `}>
+            <Clock className="h-4 w-4" />
+            <span>{timeLeft !== null ? formatTime(timeLeft) : '00:00'}</span>
+          </div>
         </div>
       </header>
 
