@@ -4,13 +4,13 @@ import { getFirestore } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB3_1lREx_u8uZ-8cP5HZGAiPh5x5MdDeI",
-  authDomain: "online-examination-platf-1a2b6.firebaseapp.com",
-  projectId: "online-examination-platf-1a2b6",
-  storageBucket: "online-examination-platf-1a2b6.firebasestorage.app",
-  messagingSenderId: "862955269904",
-  appId: "1:862955269904:web:bfb58e5eab7c2df0ae7f95",
-  measurementId: "G-RC04BMG2MM"
+  apiKey: "AIzaSyAJRSxrEsUSiTwk2IySSIUifPAzJeCwLAg",
+  authDomain: "online-examination-platf-be9b3.firebaseapp.com",
+  projectId: "online-examination-platf-be9b3",
+  storageBucket: "online-examination-platf-be9b3.firebasestorage.app",
+  messagingSenderId: "2501014297",
+  appId: "1:2501014297:web:f872230ad54dfdcda6cb88",
+  measurementId: "G-V4CXYF5NQ2"
 };
 
 const app = initializeApp(firebaseConfig);
