@@ -19,6 +19,26 @@ export const Login: React.FC = () => {
     }
   });
 
+  const getFirebaseErrorMessage = (err: any) => {
+    const code = err?.code || '';
+    switch (code) {
+      case 'auth/unauthorized-domain':
+        return 'This domain is not authorized in Firebase. Please add your website domain in Firebase Console -> Authentication -> Settings -> Authorized Domains.';
+      case 'auth/operation-not-allowed':
+        return 'Google Sign-In is not enabled. Please enable Google provider in Firebase Console -> Authentication -> Sign-in method.';
+      case 'auth/popup-closed-by-user':
+        return 'Google login popup was closed before completing authentication. Please try again.';
+      case 'auth/popup-blocked':
+        return 'Google login popup was blocked by your browser. Please allow popups for this site.';
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
+        return 'Invalid email or password.';
+      default:
+        return err?.message || 'Authentication failed. Please try again.';
+    }
+  };
+
   const onSubmit = async (data: any) => {
     setError(null);
     setLoading(true);
@@ -27,7 +47,7 @@ export const Login: React.FC = () => {
       navigate('/dashboard');
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Invalid email or password.');
+      setError(getFirebaseErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -41,7 +61,7 @@ export const Login: React.FC = () => {
       navigate('/dashboard');
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Google Sign-In failed.');
+      setError(getFirebaseErrorMessage(err));
     } finally {
       setGoogleLoading(false);
     }
