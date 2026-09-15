@@ -2,16 +2,38 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { BookOpen, Clock, Calendar, Search, AlertCircle, ArrowRight } from 'lucide-react';
+import { BookOpen, Clock, Calendar, Search, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LoadingSpinner } from '../../components/UI/LoadingSpinner';
+import { seedSampleExamsToFirestore } from '../../utils/seedExams';
 
 export const AvailableExams: React.FC = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
   const [exams, setExams] = useState<any[]>([]);
   const [attempts, setAttempts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSeedExams = async () => {
+    if (!user) return;
+    setSeeding(true);
+    try {
+      await seedSampleExamsToFirestore(user.uid);
+      // Refresh exams query
+      const examsQuery = query(collection(db, 'exams'), where('isPublished', '==', true));
+      const examsSnap = await getDocs(examsQuery);
+      const examsList = examsSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setExams(examsList);
+    } catch (err) {
+      console.error("Seeding error:", err);
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -21,10 +43,20 @@ export const AvailableExams: React.FC = () => {
       try {
         const examsQuery = query(collection(db, 'exams'), where('isPublished', '==', true));
         const examsSnap = await getDocs(examsQuery);
-        const examsList = examsSnap.docs.map(doc => ({
+        let examsList = examsSnap.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
+
+        if (examsList.length === 0) {
+          console.log("Auto-seeding 10 sample exams...");
+          await seedSampleExamsToFirestore(user.uid);
+          const reSnap = await getDocs(examsQuery);
+          examsList = reSnap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+        }
         setExams(examsList);
 
         const attemptsQuery = query(collection(db, 'attempts'), where('userId', '==', user.uid));
@@ -90,18 +122,35 @@ export const AvailableExams: React.FC = () => {
           </p>
         </div>
         
-        {/* Search Bar */}
-        <div className="relative w-full md:w-80">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-            <Search className="h-4 w-4 text-slate-400" />
-          </span>
-          <input
-            type="text"
-            placeholder="Search by subject, title..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm outline-none transition-all dark:border-slate-800 dark:bg-slate-900 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-          />
+        {/* Search Bar & Seed Button */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          <button
+            onClick={handleSeedExams}
+            disabled={seeding}
+            className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md hover:from-emerald-500 hover:to-teal-500 active:scale-95 disabled:opacity-50 transition-all"
+          >
+            {seeding ? (
+              <LoadingSpinner size="sm" />
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Seed 10 Sample Exams
+              </>
+            )}
+          </button>
+
+          <div className="relative w-full md:w-80">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search className="h-4 w-4 text-slate-400" />
+            </span>
+            <input
+              type="text"
+              placeholder="Search by subject, title..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm outline-none transition-all dark:border-slate-800 dark:bg-slate-900 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
         </div>
       </div>
 
@@ -112,8 +161,16 @@ export const AvailableExams: React.FC = () => {
           Active Now (Available to Attempt)
         </h2>
         {available.length === 0 ? (
-          <div className="rounded-3xl border border-slate-100 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-sm text-slate-400 dark:text-slate-500">No active exams available to take at this moment.</p>
+          <div className="rounded-3xl border border-slate-100 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900 flex flex-col items-center justify-center">
+            <p className="text-sm text-slate-400 dark:text-slate-500 mb-4">No active exams available to take at this moment.</p>
+            <button
+              onClick={handleSeedExams}
+              disabled={seeding}
+              className="flex items-center gap-2 rounded-2xl bg-primary-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-primary-500 transition-colors shadow-lg shadow-primary-600/20"
+            >
+              <Sparkles className="h-4 w-4" />
+              Populate 10 Computer Science Exams Now
+            </button>
           </div>
         ) : (
           <div className="grid gap-5 md:grid-cols-2">

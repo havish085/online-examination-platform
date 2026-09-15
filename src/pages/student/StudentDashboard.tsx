@@ -16,6 +16,8 @@ import { LoadingSpinner } from '../../components/UI/LoadingSpinner';
 import { ThreeDCard } from '../../components/UI/ThreeDCard';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+import { seedSampleExamsToFirestore } from '../../utils/seedExams';
+
 export const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -34,10 +36,20 @@ export const StudentDashboard: React.FC = () => {
         // 1. Fetch published exams
         const examsQuery = query(collection(db, 'exams'), where('isPublished', '==', true));
         const examsSnap = await getDocs(examsQuery);
-        const examsList = examsSnap.docs.map(doc => ({
+        let examsList = examsSnap.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
+
+        if (examsList.length === 0) {
+          console.log("Auto-seeding 10 sample exams...");
+          await seedSampleExamsToFirestore(user.uid);
+          const reSnap = await getDocs(examsQuery);
+          examsList = reSnap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+        }
         setExams(examsList);
 
         // 2. Fetch student attempts
