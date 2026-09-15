@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LoadingSpinner } from '../../components/UI/LoadingSpinner';
+import { ThreeDCard } from '../../components/UI/ThreeDCard';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export const StudentDashboard: React.FC = () => {
@@ -131,46 +132,52 @@ export const StudentDashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* Metrics Row */}
+      {/* 3D Metrics Row */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-slate-400 dark:text-slate-500">Exams Taken</span>
-            <div className="rounded-xl bg-blue-50 p-2 text-blue-650 dark:bg-blue-950/30 dark:text-blue-400">
-              <BookOpen className="h-5 w-5" />
+        <ThreeDCard intensity={10}>
+          <div className="h-full rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/90 dark:backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-400 dark:text-slate-400">Exams Taken</span>
+              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
+                <BookOpen className="h-5 w-5" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{totalExamsTaken}</h2>
+              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Total submitted assessments</p>
             </div>
           </div>
-          <div className="mt-4">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{totalExamsTaken}</h2>
-            <p className="mt-1 text-xs text-slate-450 dark:text-slate-500">Total submitted assessments</p>
-          </div>
-        </div>
+        </ThreeDCard>
 
-        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-slate-400 dark:text-slate-500">Average Percentage</span>
-            <div className="rounded-xl bg-emerald-50 p-2 text-emerald-650 dark:bg-emerald-950/30 dark:text-emerald-450">
-              <Award className="h-5 w-5" />
+        <ThreeDCard intensity={10}>
+          <div className="h-full rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/90 dark:backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-400 dark:text-slate-400">Average Percentage</span>
+              <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+                <Award className="h-5 w-5" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{averagePercentage}%</h2>
+              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Mean percentage across all tests</p>
             </div>
           </div>
-          <div className="mt-4">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{averagePercentage}%</h2>
-            <p className="mt-1 text-xs text-slate-450 dark:text-slate-500">Mean percentage across all tests</p>
-          </div>
-        </div>
+        </ThreeDCard>
 
-        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-slate-400 dark:text-slate-500">Highest Score</span>
-            <div className="rounded-xl bg-amber-50 p-2 text-amber-650 dark:bg-amber-950/30 dark:text-amber-400">
-              <TrendingUp className="h-5 w-5" />
+        <ThreeDCard intensity={10}>
+          <div className="h-full rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/90 dark:backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-400 dark:text-slate-400">Highest Score</span>
+              <div className="rounded-xl bg-amber-50 p-2.5 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400">
+                <TrendingUp className="h-5 w-5" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{highestPercentage}%</h2>
+              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Your personal best record</p>
             </div>
           </div>
-          <div className="mt-4">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{highestPercentage}%</h2>
-            <p className="mt-1 text-xs text-slate-450 dark:text-slate-500">Your personal best record</p>
-          </div>
-        </div>
+        </ThreeDCard>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
